@@ -52,6 +52,10 @@
   text-shadow: 0 0 12px rgba(255, 184, 0, 0.8), 0 0 24px rgba(255, 184, 0, 0.5);
 }
 
+.spidey-glow-violet {
+  text-shadow: 0 0 14px rgba(168, 85, 247, 0.95), 0 0 28px rgba(147, 51, 234, 0.7), 0 0 45px rgba(126, 34, 206, 0.5);
+}
+
 /* =========================================
    COMPREHENSIVE LIGHT / WHITE THEME STYLES
    ========================================= */
@@ -147,6 +151,11 @@ body.light-theme,
 .light-theme .spidey-glow-red {
   color: #dc2626 !important;
   text-shadow: 0 0 8px rgba(226, 54, 54, 0.3) !important;
+}
+
+.light-theme .spidey-glow-violet {
+  color: #7e22ce !important;
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.4) !important;
 }
 
 /* Inputs & Form Controls in White Theme */

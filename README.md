@@ -1,8 +1,8 @@
 # 🕸️ SPIN & WHEEL — Renaissance 2026
 
 > **Department of Computer Science & Engineering**  
-> **CSEA — WE CAN ∞ WE WILL**  
 > **CSE Coding Club (CCC)**  
+> **CSEA — WE CAN ∞ WE WILL**  
 
 A high-energy, Spider-Man themed, team-based interactive challenge wheel web application engineered for the **Renaissance 2026** technical symposium.
 
@@ -71,7 +71,7 @@ src/
 ├── assets/
 │   └── mascot.jpg               # Spider-Man reference mascot
 ├── components/
-│   ├── HeaderBranding.jsx       # Renaissance, CSEA, CCC logos & theme toggle
+│   ├── HeaderBranding.jsx       # Renaissance, CCC, CSEA logos & theme toggle
 │   ├── QuestionCard.jsx         # Question details, 2-min lock bar, live stopwatch
 │   ├── QuestionRenderer.jsx     # Dynamic renderer for Coding, MCQ, Output, etc.
 │   ├── RegistrationForm.jsx     # Duo registration form with roll validation
@@ -173,4 +173,4 @@ npm run preview
 
 - **Event:** Renaissance 2026
 - **Department:** Department of Computer Science & Engineering
-- **Organizers:** CSEA & CSE Coding Club (CCC)
+- **Organizers:** CSE Coding Club (CCC) & CSEA

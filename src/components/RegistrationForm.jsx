@@ -299,7 +299,7 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
                   setYear('1st Year');
                   sound.playButtonClick();
                 }}
-                className={`p-1.5 rounded-lg border-2 text-left transition-all relative flex items-center justify-between ${
+                className={`py-2 px-3 rounded-lg border-2 text-left transition-all relative flex items-center justify-between ${
                   year === '1st Year'
                     ? isLight
                       ? 'bg-amber-50 border-amber-500 shadow-sm ring-1 ring-amber-400'
@@ -309,20 +309,13 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
                       : 'bg-[#0c142c]/70 border-zinc-800 text-gray-400 opacity-70'
                 }`}
               >
-                <div>
-                  <div className={`text-xs font-black uppercase comic-font tracking-wide ${
-                    year === '1st Year' ? (isLight ? 'text-amber-900' : 'text-yellow-300') : (isLight ? 'text-slate-700' : 'text-gray-300')
-                  }`}>
-                    🌟 1st Year
-                  </div>
-                  <div className={`text-[9px] font-mono leading-none ${
-                    year === '1st Year' ? (isLight ? 'text-amber-800' : 'text-amber-200/80') : (isLight ? 'text-slate-500' : 'text-gray-500')
-                  }`}>
-                    Freshers Track
-                  </div>
+                <div className={`text-xs sm:text-sm font-black uppercase comic-font tracking-wide ${
+                  year === '1st Year' ? (isLight ? 'text-amber-900' : 'text-yellow-300') : (isLight ? 'text-slate-700' : 'text-gray-300')
+                }`}>
+                  1st Year
                 </div>
                 {year === '1st Year' && (
-                  <CheckCircle2 className={`w-3.5 h-3.5 ${isLight ? 'text-amber-600' : 'text-yellow-400'}`} />
+                  <CheckCircle2 className={`w-4 h-4 ${isLight ? 'text-amber-600' : 'text-yellow-400'}`} />
                 )}
               </button>
 
@@ -333,7 +326,7 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
                   setYear('2nd Year');
                   sound.playButtonClick();
                 }}
-                className={`p-1.5 rounded-lg border-2 text-left transition-all relative flex items-center justify-between ${
+                className={`py-2 px-3 rounded-lg border-2 text-left transition-all relative flex items-center justify-between ${
                   year === '2nd Year'
                     ? isLight
                       ? 'bg-cyan-50 border-cyan-500 shadow-sm ring-1 ring-cyan-400'
@@ -343,20 +336,13 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
                       : 'bg-[#0c142c]/70 border-zinc-800 text-gray-400 opacity-70'
                 }`}
               >
-                <div>
-                  <div className={`text-xs font-black uppercase comic-font tracking-wide ${
-                    year === '2nd Year' ? (isLight ? 'text-cyan-900' : 'text-cyan-300') : (isLight ? 'text-slate-700' : 'text-gray-300')
-                  }`}>
-                    ⚡ 2nd Year
-                  </div>
-                  <div className={`text-[9px] font-mono leading-none ${
-                    year === '2nd Year' ? (isLight ? 'text-cyan-800' : 'text-cyan-200/80') : (isLight ? 'text-slate-500' : 'text-gray-500')
-                  }`}>
-                    Sophomore Track
-                  </div>
+                <div className={`text-xs sm:text-sm font-black uppercase comic-font tracking-wide ${
+                  year === '2nd Year' ? (isLight ? 'text-cyan-900' : 'text-cyan-300') : (isLight ? 'text-slate-700' : 'text-gray-300')
+                }`}>
+                  2nd Year
                 </div>
                 {year === '2nd Year' && (
-                  <CheckCircle2 className={`w-3.5 h-3.5 ${isLight ? 'text-cyan-600' : 'text-cyan-400'}`} />
+                  <CheckCircle2 className={`w-4 h-4 ${isLight ? 'text-cyan-600' : 'text-cyan-400'}`} />
                 )}
               </button>
             </div>
