@@ -119,12 +119,12 @@ export default function SpinWheel({
                     strokeWidth="1"
                   />
 
-                  {/* Label (Q1, Q2, ..., Q20) */}
+                  {/* Label (Q1, Q2, ..., Q20 or Q25) */}
                   <text
                     x={tx}
                     y={ty}
                     fill={isHighlighted ? '#000000' : isUsed ? '#6b7280' : colorConfig.text}
-                    fontSize="17"
+                    fontSize={total > 20 ? "13.5" : "16.5"}
                     fontWeight="900"
                     fontFamily="Outfit, Impact, sans-serif"
                     textAnchor="middle"
