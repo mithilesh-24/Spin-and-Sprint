@@ -561,9 +561,10 @@ print(x)`,
   }
 ];
 
-// Default helper to fetch questions by year
-export function getQuestionsForYear(year = "2nd Year") {
-  if (year === "1st Year" || year === "1" || year === 1) {
+// Helper to fetch questions by year
+export function getQuestionsForYear(year) {
+  const str = String(year || "").trim().toLowerCase();
+  if (str.indexOf("1") !== -1 || str.indexOf("first") !== -1) {
     return QUESTIONS_1ST_YEAR;
   }
   return QUESTIONS_2ND_YEAR;

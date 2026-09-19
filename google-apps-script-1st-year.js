@@ -1,44 +1,28 @@
 /**
- * GOOGLE APPS SCRIPT FOR SPIN & WHEEL — RENAISSANCE 2026
+ * GOOGLE APPS SCRIPT FOR 1ST YEAR (FRESHERS TRACK) — RENAISSANCE 2026
+ * Rolls start with '26' (e.g. 26CSR101, 26ITR012)
+ *
+ * Sheet: Renaissance 2026 — 1st Year
+ * Target URL: https://docs.google.com/spreadsheets/d/1FyEnYQsyq_xTi0iGVl-EWEv5599tSzsm-YTG15MKNgc/edit
  */
 
-// Full Exact Google Sheet URLs (Avoids any ID copy-paste typo):
-var SPREADSHEETS = {
-  "1st Year": "https://docs.google.com/spreadsheets/d/1FyEnYQsyq_xTi0iGVl-EWEv5599tSzsm-YTG15MKNgc/edit",
-  "2nd Year": "https://docs.google.com/spreadsheets/d/1s55VQBx_LxNHcHkx1UP7wfeoBPffpJIb8ce-FQFOEyM/edit"
-};
+var SPREADSHEET_URL_1ST = "https://docs.google.com/spreadsheets/d/1FyEnYQsyq_xTi0iGVl-EWEv5599tSzsm-YTG15MKNgc/edit";
 
-function getSpreadsheetForYear(year) {
-  var yearStr = (year || "2nd Year").toString().toLowerCase();
-  var isFirstYear = (yearStr.indexOf("1") !== -1 || yearStr.indexOf("first") !== -1);
-  var targetKey = isFirstYear ? "1st Year" : "2nd Year";
-  var targetUrl = SPREADSHEETS[targetKey];
-
+function getSpreadsheet() {
   try {
-    return SpreadsheetApp.openByUrl(targetUrl);
-  } catch (urlErr) {
-    var match = targetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+    return SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openByUrl(SPREADSHEET_URL_1ST);
+  } catch (err) {
+    var match = SPREADSHEET_URL_1ST.match(/\/d\/([a-zA-Z0-9-_]+)/);
     if (match && match[1]) {
       return SpreadsheetApp.openById(match[1]);
     }
-    throw new Error("Unable to open " + targetKey + " Spreadsheet. Please verify Drive access. Error: " + urlErr.message);
+    throw new Error("Unable to open 1st Year Spreadsheet: " + err.message);
   }
 }
 
-// =========================================================================
-// TEST FUNCTION: Select 'testConnection' and click ▶️ Run
-// =========================================================================
 function testConnection() {
-  Logger.log("=========================================");
-  Logger.log("Testing 1st Year Spreadsheet...");
-  var ss1 = getSpreadsheetForYear("1st Year");
-  Logger.log("✅ SUCCESS 1st Year: " + ss1.getName());
-
-  Logger.log("-----------------------------------------");
-  Logger.log("Testing 2nd Year Spreadsheet...");
-  var ss2 = getSpreadsheetForYear("2nd Year");
-  Logger.log("✅ SUCCESS 2nd Year: " + ss2.getName());
-  Logger.log("=========================================");
+  var ss = getSpreadsheet();
+  Logger.log("✅ SUCCESS 1st Year Sheet Connected: " + ss.getName() + " (" + ss.getUrl() + ")");
 }
 
 function sanitizeSheetName(name) {
@@ -47,19 +31,12 @@ function sanitizeSheetName(name) {
   return clean.substring(0, 50) || "Team";
 }
 
-// =========================================================================
-// POST HANDLER: REGISTRATION & SPIN RESULTS
-// =========================================================================
+// POST HANDLER (Registration & Spin Results)
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     var action = data.action || "spin_result";
-    var year = data.year || "2nd Year";
-    var ss = getSpreadsheetForYear(year);
-
-    if (!ss) {
-      throw new Error("Unable to access target spreadsheet for year: " + year);
-    }
+    var ss = getSpreadsheet();
 
     var teamName = (data.teamName || "Unnamed Team").trim();
     var member1Name = (data.member1Name || "").trim();
@@ -68,7 +45,7 @@ function doPost(e) {
     var member2Roll = (data.member2Roll || "").trim().toUpperCase();
     var entryTime = data.entryTime || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    // 1. Ensure "Main" overview sheet exists
+    // 1. Ensure "Main" sheet exists
     var mainSheet = ss.getSheetByName("Main");
     if (!mainSheet) {
       mainSheet = ss.insertSheet("Main", 0);
@@ -89,7 +66,7 @@ function doPost(e) {
       mainSheet.getRange("A1:I1").setFontWeight("bold").setBackground("#E23636").setFontColor("#FFFFFF");
     }
 
-    // 2. Find or create team row in "Main"
+    // 2. Find or create team row in Main
     var mainData = mainSheet.getDataRange().getValues();
     var existingMainRowIndex = -1;
     var currentQuestionCount = 0;
@@ -132,7 +109,7 @@ function doPost(e) {
       mainSheet.getRange(existingMainRowIndex, 8).setValue(currentQuestionCount);
     }
 
-    // 3. Find or create single team tab
+    // 3. Find or create team tab
     var tabName = sanitizeSheetName(recordedTeamName || teamName);
     var teamSheet = ss.getSheetByName(tabName);
 
@@ -158,8 +135,8 @@ function doPost(e) {
 
     // 4. Initialize team tab template if empty
     if (teamSheet.getLastRow() === 0) {
-      teamSheet.appendRow(["TEAM DETAILS — RENAISSANCE 2026", "", "", "", "", "", "", ""]);
-      teamSheet.appendRow(["Team Name:", recordedTeamName || teamName, "Year Track:", year, "Entry Time:", entryTime, "", ""]);
+      teamSheet.appendRow(["TEAM DETAILS — RENAISSANCE 2026 (1ST YEAR)", "", "", "", "", "", "", ""]);
+      teamSheet.appendRow(["Team Name:", recordedTeamName || teamName, "Track:", "1st Year", "Entry Time:", entryTime, "", ""]);
       teamSheet.appendRow(["Member 1:", member1Name, "Roll Number:", member1Roll, "", "", "", ""]);
       teamSheet.appendRow(["Member 2:", member2Name, "Roll Number:", member2Roll, "", "", "", ""]);
       teamSheet.appendRow(["", "", "", "", "", "", "", ""]);
@@ -209,7 +186,7 @@ function doPost(e) {
 
     return ContentService.createTextOutput(JSON.stringify({
       status: "success",
-      year: year,
+      year: "1st Year",
       spreadsheetName: ss.getName(),
       teamName: recordedTeamName,
       questionCount: currentQuestionCount
@@ -223,14 +200,11 @@ function doPost(e) {
   }
 }
 
-// =========================================================================
-// GET HANDLER: LOOKUPS & DUPLICATE CHECKS
-// =========================================================================
+// GET HANDLER (Lookups & Duplicate Checks)
 function doGet(e) {
   try {
     var action = e.parameter.action;
-    var year = e.parameter.year || "2nd Year";
-    var ss = getSpreadsheetForYear(year);
+    var ss = getSpreadsheet();
 
     if (action === "lookup") {
       var searchName = (e.parameter.name || "").trim().toLowerCase();
@@ -302,7 +276,7 @@ function doGet(e) {
 
     return ContentService.createTextOutput(JSON.stringify({
       status: "ready",
-      year: year,
+      track: "1st Year",
       spreadsheetName: ss.getName()
     })).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {

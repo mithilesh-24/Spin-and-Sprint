@@ -12,14 +12,17 @@ import {
   lookupParticipantByName,
   lookupTeamByName,
   isValidRollNumber,
+  getRollNumberErrorMessage,
   normalizeRollNumber,
   checkTeamAlreadyParticipated,
+  registerTeam,
+  normalizeYear,
 } from '../services/googleSheets';
 import { sound } from '../utils/audio';
 
 export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) {
   const isLight = theme === 'light';
-  const [year, setYear] = useState('2nd Year'); // '1st Year' or '2nd Year'
+  const [year, setYear] = useState('1st Year'); // '1st Year' or '2nd Year'
   const [teamName, setTeamName] = useState('');
   const [member1Name, setMember1Name] = useState('');
   const [member1Roll, setMember1Roll] = useState('');
@@ -35,6 +38,17 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
   const [errors, setErrors] = useState({});
   const [duplicateTeamPrompt, setDuplicateTeamPrompt] = useState(null);
   const [isChecking, setIsChecking] = useState(false);
+
+  // Clear roll errors if track changes
+  const handleYearChange = (newYear) => {
+    setYear(newYear);
+    setErrors(prev => ({
+      ...prev,
+      member1Roll: null,
+      member2Roll: null
+    }));
+    sound.playButtonClick();
+  };
 
   // Debounced lookup for Team Name
   useEffect(() => {
@@ -146,20 +160,18 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
       errs.member1Name = 'Member 1 Name is required.';
     }
 
-    if (!member1Roll.trim()) {
-      errs.member1Roll = 'Member 1 Roll Number is required.';
-    } else if (!isValidRollNumber(member1Roll)) {
-      errs.member1Roll = 'Invalid format (e.g. 24CSR175)';
+    const m1Error = getRollNumberErrorMessage(member1Roll, year);
+    if (m1Error) {
+      errs.member1Roll = m1Error;
     }
 
     if (!member2Name.trim()) {
       errs.member2Name = 'Member 2 Name is required.';
     }
 
-    if (!member2Roll.trim()) {
-      errs.member2Roll = 'Member 2 Roll Number is required.';
-    } else if (!isValidRollNumber(member2Roll)) {
-      errs.member2Roll = 'Invalid format (e.g. 24CSR208)';
+    const m2Error = getRollNumberErrorMessage(member2Roll, year);
+    if (m2Error) {
+      errs.member2Roll = m2Error;
     }
 
     if (
@@ -175,15 +187,23 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
   };
 
   const proceedWithTeam = () => {
+    const canonicalYear = normalizeYear(year);
     const teamPayload = {
       teamName: teamName.trim(),
-      year: year,
+      year: canonicalYear,
       member1Name: member1Name.trim(),
       member1Roll: normalizeRollNumber(member1Roll),
       member2Name: member2Name.trim(),
       member2Roll: normalizeRollNumber(member2Roll),
       entryTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
+    
+    // Asynchronously save to Google Sheets & local cache without stalling the UI transition
+    registerTeam(teamPayload).catch(regErr => {
+      console.warn("Background registration sync note:", regErr);
+    });
+
+    // Immediate transition to the wheel game page
     onRegisterSuccess(teamPayload);
   };
 
@@ -212,7 +232,7 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
 
       proceedWithTeam();
     } catch (err) {
-      console.error(err);
+      console.warn("Duplicate check bypassed:", err);
       proceedWithTeam();
     } finally {
       setIsChecking(false);
@@ -295,10 +315,7 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
               {/* 1st Year Option */}
               <button
                 type="button"
-                onClick={() => {
-                  setYear('1st Year');
-                  sound.playButtonClick();
-                }}
+                onClick={() => handleYearChange('1st Year')}
                 className={`py-2 px-3 rounded-lg border-2 text-left transition-all relative flex items-center justify-between ${
                   year === '1st Year'
                     ? isLight
@@ -322,10 +339,7 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
               {/* 2nd Year Option */}
               <button
                 type="button"
-                onClick={() => {
-                  setYear('2nd Year');
-                  sound.playButtonClick();
-                }}
+                onClick={() => handleYearChange('2nd Year')}
                 className={`py-2 px-3 rounded-lg border-2 text-left transition-all relative flex items-center justify-between ${
                   year === '2nd Year'
                     ? isLight
@@ -409,6 +423,13 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
               }`}>
                 <User className="w-3 h-3" /> Member 1 (Lead)
               </span>
+              <span className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded border ${
+                year === '1st Year'
+                  ? (isLight ? 'bg-amber-100 border-amber-300 text-amber-900' : 'bg-amber-950/60 border-amber-500/40 text-yellow-300')
+                  : (isLight ? 'bg-cyan-100 border-cyan-300 text-cyan-900' : 'bg-cyan-950/60 border-cyan-500/40 text-cyan-300')
+              }`}>
+                {year === '1st Year' ? 'Prefix: 26...' : 'Prefix: 25...'}
+              </span>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -444,7 +465,7 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
                     setMember1Roll(e.target.value.toUpperCase());
                     if (errors.member1Roll) setErrors({ ...errors, member1Roll: null });
                   }}
-                  placeholder="Roll (e.g. 24CSR175)"
+                  placeholder={year === '1st Year' ? 'Roll (e.g. 26CSR101)' : 'Roll (e.g. 25CSR175)'}
                   className={`w-full px-2.5 py-1.5 border rounded text-xs uppercase font-mono focus:outline-none focus:ring-1 focus:ring-cyan-500 ${
                     isLight
                       ? errors.member1Roll
@@ -491,6 +512,13 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
               }`}>
                 <User className="w-3 h-3" /> Member 2 (Partner)
               </span>
+              <span className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded border ${
+                year === '1st Year'
+                  ? (isLight ? 'bg-amber-100 border-amber-300 text-amber-900' : 'bg-amber-950/60 border-amber-500/40 text-yellow-300')
+                  : (isLight ? 'bg-rose-100 border-rose-300 text-rose-900' : 'bg-red-950/60 border-red-500/40 text-rose-300')
+              }`}>
+                {year === '1st Year' ? 'Prefix: 26...' : 'Prefix: 25...'}
+              </span>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -526,7 +554,7 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
                     setMember2Roll(e.target.value.toUpperCase());
                     if (errors.member2Roll) setErrors({ ...errors, member2Roll: null });
                   }}
-                  placeholder="Roll (e.g. 24CSR208)"
+                  placeholder={year === '1st Year' ? 'Roll (e.g. 26CSR102)' : 'Roll (e.g. 25CSR208)'}
                   className={`w-full px-2.5 py-1.5 border rounded text-xs uppercase font-mono focus:outline-none focus:ring-1 focus:ring-rose-500 ${
                     isLight
                       ? errors.member2Roll

@@ -1,12 +1,13 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { getQuestionsForYear } from '../data/questions';
 import { sound } from '../utils/audio';
-import { saveTeamSpinResult, saveTeamSolvingTime, getTeamSolvingHistory } from '../services/googleSheets';
+import { normalizeYear, saveTeamSpinResult, saveTeamSolvingTime, getTeamSolvingHistory } from '../services/googleSheets';
 
 const LOCK_DURATION_SECONDS = 120; // 2 minutes challenge lock
 
 export function useSpinWheel(teamData) {
-  const currentYear = teamData?.year || '2nd Year';
+  const currentYear = normalizeYear(teamData?.year);
+  console.log("Current team year:", currentYear);
   const questions = useMemo(() => getQuestionsForYear(currentYear), [currentYear]);
 
   const [usedQuestionIds, setUsedQuestionIds] = useState([]);
