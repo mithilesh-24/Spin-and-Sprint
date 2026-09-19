@@ -51,7 +51,11 @@ function sanitizeSheetName(name) {
 // POST HANDLER: REGISTRATION & SPIN RESULTS
 // =========================================================================
 function doPost(e) {
+  var lock = LockService.getScriptLock();
   try {
+    // Acquire script lock (wait up to 30 seconds for concurrent requests to queue safely)
+    lock.waitLock(30000);
+
     var data = JSON.parse(e.postData.contents);
     var action = data.action || "spin_result";
     var year = data.year || "2nd Year";
@@ -132,28 +136,16 @@ function doPost(e) {
       mainSheet.getRange(existingMainRowIndex, 8).setValue(currentQuestionCount);
     }
 
-    // 3. Find or create single team tab
+    // 3. Find or create single team tab (Ultra-fast direct lookup for high concurrency)
     var tabName = sanitizeSheetName(recordedTeamName || teamName);
     var teamSheet = ss.getSheetByName(tabName);
 
     if (!teamSheet) {
-      var allSheets = ss.getSheets();
-      for (var s = 0; s < allSheets.length; s++) {
-        var sName = allSheets[s].getName();
-        if (sName !== "Main") {
-          var preview = allSheets[s].getRange("A1:D5").getValues();
-          var combinedStr = preview.map(function(row) { return row.join(" "); }).join(" ").toUpperCase();
-          if ((member1Roll && combinedStr.indexOf(member1Roll) !== -1) &&
-              (member2Roll && combinedStr.indexOf(member2Roll) !== -1)) {
-            teamSheet = allSheets[s];
-            break;
-          }
-        }
+      try {
+        teamSheet = ss.insertSheet(tabName);
+      } catch (insertErr) {
+        teamSheet = ss.getSheetByName(tabName) || ss.insertSheet(tabName.substring(0, 40) + "_" + (new Date().getTime() % 10000));
       }
-    }
-
-    if (!teamSheet) {
-      teamSheet = ss.insertSheet(tabName);
     }
 
     // 4. Initialize team tab template if empty
@@ -207,6 +199,8 @@ function doPost(e) {
       }
     }
 
+    SpreadsheetApp.flush();
+
     return ContentService.createTextOutput(JSON.stringify({
       status: "success",
       year: year,
@@ -220,6 +214,8 @@ function doPost(e) {
       status: "error",
       message: error.toString()
     })).setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
   }
 }
 

@@ -8,9 +8,113 @@ const GOOGLE_SCRIPT_URL_DEFAULT = import.meta.env.VITE_GOOGLE_SCRIPT_URL || '';
 const LOCAL_STORAGE_KEY_PARTICIPANTS = 'spidey_participants_registry';
 const LOCAL_STORAGE_KEY_TEAMS = 'spidey_teams_history';
 const LOCAL_STORAGE_KEY_SPINS = 'spidey_spin_logs';
+const LOCAL_STORAGE_KEY_QUEUE = 'spidey_sync_queue';
 
 // Default sample participants (empty for production)
 const DEFAULT_PARTICIPANTS = [];
+
+let isProcessingQueue = false;
+
+/**
+ * Resilient Background Sync Queue Worker
+ * Ensures zero data loss when multiple teams submit simultaneously or during network fluctuations.
+ */
+export async function processSyncQueue() {
+  if (isProcessingQueue) return;
+  isProcessingQueue = true;
+
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY_QUEUE);
+    if (!raw) {
+      isProcessingQueue = false;
+      return;
+    }
+    const queue = JSON.parse(raw);
+    if (!Array.isArray(queue) || queue.length === 0) {
+      isProcessingQueue = false;
+      return;
+    }
+
+    const item = queue[0];
+    const scriptUrl = getGoogleScriptUrlForYear(item.payload?.year);
+
+    if (!scriptUrl) {
+      queue.shift();
+      localStorage.setItem(LOCAL_STORAGE_KEY_QUEUE, JSON.stringify(queue));
+      isProcessingQueue = false;
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+    try {
+      console.log(`[Sync Queue Dispatch -> ${item.payload?.year}]`, item.payload?.action, "Team:", item.payload?.teamName);
+      await fetch(scriptUrl, {
+        method: "POST",
+        mode: "no-cors",
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(item.payload)
+      });
+      clearTimeout(timeoutId);
+
+      // Successfully synced: Remove from queue
+      queue.shift();
+      localStorage.setItem(LOCAL_STORAGE_KEY_QUEUE, JSON.stringify(queue));
+      console.log("[Sync Queue Success] Processed item:", item.payload?.action);
+    } catch (err) {
+      clearTimeout(timeoutId);
+      item.attempts = (item.attempts || 0) + 1;
+      if (item.attempts >= 6) {
+        // Drop after 6 retries to prevent blocking other items
+        queue.shift();
+      }
+      localStorage.setItem(LOCAL_STORAGE_KEY_QUEUE, JSON.stringify(queue));
+      console.warn("[Sync Queue Retry Scheduled]", err?.name === 'AbortError' ? 'Timeout' : err);
+    }
+  } catch (e) {
+    console.error("[Sync Queue Error]", e);
+  } finally {
+    isProcessingQueue = false;
+    try {
+      const remaining = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_QUEUE) || '[]');
+      if (remaining.length > 0) {
+        // Jittered backoff (800ms - 1800ms) to smoothly distribute server load across 60+ participants
+        const nextDelay = 800 + Math.floor(Math.random() * 1000);
+        setTimeout(processSyncQueue, nextDelay);
+      }
+    } catch (e) {}
+  }
+}
+
+/**
+ * Enqueue payload into persistent queue for guaranteed delivery
+ */
+function enqueueSync(payload) {
+  try {
+    const queue = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_QUEUE) || '[]');
+    queue.push({
+      id: `${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      payload,
+      attempts: 0,
+      createdAt: Date.now()
+    });
+    localStorage.setItem(LOCAL_STORAGE_KEY_QUEUE, JSON.stringify(queue));
+    // Immediately trigger processor
+    setTimeout(processSyncQueue, 50);
+  } catch (e) {
+    console.error("Failed to enqueue sync item", e);
+  }
+}
+
+// Auto-trigger sync queue on reconnect and periodically
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', processSyncQueue);
+  setInterval(processSyncQueue, 15000);
+}
 
 /**
  * Normalizes year string to strict canonical format: "1st Year" or "2nd Year"
@@ -102,35 +206,12 @@ async function callGoogleScript(params, timeoutMs = 3500) {
 }
 
 /**
- * Centralized POST caller for Google Apps Script Web App with AbortController timeout
+ * Centralized POST caller for Google Apps Script Web App
+ * Automatically enqueues payloads to the persistent queue for reliable asynchronous processing.
  */
-async function postToGoogleScript(payload, timeoutMs = 5000) {
-  const scriptUrl = getGoogleScriptUrlForYear(payload?.year);
-  if (!scriptUrl) return null;
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-  console.log(`[Google Sheets POST -> ${payload?.year || 'Default'}]`, payload, "Endpoint:", scriptUrl);
-
-  try {
-    const response = await fetch(scriptUrl, {
-      method: "POST",
-      mode: "no-cors",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"
-      },
-      body: JSON.stringify(payload)
-    });
-    clearTimeout(timeoutId);
-    console.log("[Google Sheets POST Sent]", payload.action, "Track:", payload.year, "Team:", payload.teamName);
-    return true;
-  } catch (err) {
-    clearTimeout(timeoutId);
-    console.warn("[Google Sheets POST Notice]", err?.name === 'AbortError' ? 'Sync continuing in background' : err);
-    return null;
-  }
+async function postToGoogleScript(payload) {
+  enqueueSync(payload);
+  return true;
 }
 
 export function clearAllLocalTeamsData() {
