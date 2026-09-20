@@ -266,26 +266,24 @@ export function isValidRollNumber(roll, year) {
   const clean = roll.trim().toUpperCase();
 
   if (!year) {
-    const genericRegex = /^[0-9]{2}[A-Za-z]{2,4}[0-9]{1,4}$/;
-    return genericRegex.test(clean);
+    return clean.length > 0;
   }
 
   try {
     const canonicalYear = normalizeYear(year);
     if (canonicalYear === "1st Year") {
-      const firstYearRegex = /^26[A-Za-z]{2,4}[0-9]{1,4}$/;
-      return firstYearRegex.test(clean);
+      // Format restriction removed for 1st Year
+      return clean.length > 0;
     }
     if (canonicalYear === "2nd Year") {
       const secondYearRegex = /^25[A-Za-z]{2,4}[0-9]{1,4}$/;
       return secondYearRegex.test(clean);
     }
   } catch (e) {
-    const genericRegex = /^[0-9]{2}[A-Za-z]{2,4}[0-9]{1,4}$/;
-    return genericRegex.test(clean);
+    return clean.length > 0;
   }
 
-  return false;
+  return clean.length > 0;
 }
 
 /**
@@ -304,12 +302,8 @@ export function getRollNumberErrorMessage(roll, year) {
   }
 
   if (canonicalYear === "1st Year") {
-    if (!clean.startsWith("26")) {
-      return '1st Year roll numbers must start with 26 (e.g. 26CSR101)';
-    }
-    if (!isValidRollNumber(clean, "1st Year")) {
-      return 'Invalid 1st Year format (e.g. 26CSR101)';
-    }
+    // Any non-empty roll number is valid for 1st Year
+    return null;
   } else if (canonicalYear === "2nd Year") {
     if (!clean.startsWith("25")) {
       return '2nd Year roll numbers must start with 25 (e.g. 25CSR175)';
@@ -319,7 +313,7 @@ export function getRollNumberErrorMessage(roll, year) {
     }
   } else {
     if (!isValidRollNumber(clean)) {
-      return 'Invalid roll number format (e.g. 25CSR175 or 26CSR101)';
+      return 'Invalid roll number format';
     }
   }
 

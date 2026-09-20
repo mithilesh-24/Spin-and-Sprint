@@ -425,13 +425,13 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
               }`}>
                 <User className="w-3.5 h-3.5" /> Member 1 (Lead)
               </span>
-              <span className={`text-[10px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded-md border ${
-                year === '1st Year'
-                  ? (isLight ? 'bg-amber-100 border-amber-300 text-amber-900' : 'bg-amber-950/60 border-amber-500/40 text-yellow-300')
-                  : (isLight ? 'bg-cyan-100 border-cyan-300 text-cyan-900' : 'bg-cyan-950/60 border-cyan-500/40 text-cyan-300')
-              }`}>
-                {year === '1st Year' ? 'Prefix: 26...' : 'Prefix: 25...'}
-              </span>
+              {year === '2nd Year' && (
+                <span className={`text-[10px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded-md border ${
+                  isLight ? 'bg-cyan-100 border-cyan-300 text-cyan-900' : 'bg-cyan-950/60 border-cyan-500/40 text-cyan-300'
+                }`}>
+                  Prefix: 25...
+                </span>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
@@ -469,7 +469,7 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
                     setMember1Roll(e.target.value.toUpperCase());
                     if (errors.member1Roll) setErrors({ ...errors, member1Roll: null });
                   }}
-                  placeholder={year === '1st Year' ? 'Roll No (26...)' : 'Roll No (25...)'}
+                  placeholder={year === '1st Year' ? 'Roll No' : 'Roll No (25...)'}
                   className={`w-full px-3.5 py-2 sm:py-2.5 border-2 rounded-lg text-sm uppercase font-mono font-semibold transition-all focus:outline-none ${
                     isLight
                       ? errors.member1Roll
@@ -518,13 +518,13 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
               }`}>
                 <User className="w-3.5 h-3.5" /> Member 2 (Partner)
               </span>
-              <span className={`text-[10px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded-md border ${
-                year === '1st Year'
-                  ? (isLight ? 'bg-amber-100 border-amber-300 text-amber-900' : 'bg-amber-950/60 border-amber-500/40 text-yellow-300')
-                  : (isLight ? 'bg-rose-100 border-rose-300 text-rose-900' : 'bg-red-950/60 border-red-500/40 text-rose-300')
-              }`}>
-                {year === '1st Year' ? 'Prefix: 26...' : 'Prefix: 25...'}
-              </span>
+              {year === '2nd Year' && (
+                <span className={`text-[10px] sm:text-xs font-mono font-bold px-2 py-0.5 rounded-md border ${
+                  isLight ? 'bg-rose-100 border-rose-300 text-rose-900' : 'bg-red-950/60 border-red-500/40 text-rose-300'
+                }`}>
+                  Prefix: 25...
+                </span>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
@@ -562,7 +562,7 @@ export default function RegistrationForm({ onRegisterSuccess, theme = 'dark' }) 
                     setMember2Roll(e.target.value.toUpperCase());
                     if (errors.member2Roll) setErrors({ ...errors, member2Roll: null });
                   }}
-                  placeholder={year === '1st Year' ? 'Roll No (26...)' : 'Roll No (25...)'}
+                  placeholder={year === '1st Year' ? 'Roll No' : 'Roll No (25...)'}
                   className={`w-full px-3.5 py-2 sm:py-2.5 border-2 rounded-lg text-sm uppercase font-mono font-semibold transition-all focus:outline-none ${
                     isLight
                       ? errors.member2Roll
