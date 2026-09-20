@@ -95,23 +95,6 @@ export default function QuestionRenderer({ question, theme = 'dark' }) {
                 </div>
               )}
             </div>
-
-            {/* Note / Hint Pill */}
-            {question.example && (
-              <div
-                className={`p-3 rounded-xl border text-xs font-mono flex items-start gap-2 ${
-                  isLight
-                    ? 'bg-amber-50/60 border-amber-200/80 text-amber-950'
-                    : 'bg-amber-950/20 border-amber-500/20 text-amber-200/90'
-                }`}
-              >
-                <Lightbulb className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                <div className="leading-snug">
-                  <strong className="text-amber-600 dark:text-amber-400">Logic Hint: </strong>
-                  {question.example}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Right Column: IDE Code Terminal Preview (8 Cols) */}
@@ -269,8 +252,8 @@ export default function QuestionRenderer({ question, theme = 'dark' }) {
           </div>
         </div>
 
-        {/* Constraints & Example Notes */}
-        {(question.constraints || question.example) && (
+        {/* Constraints */}
+        {question.constraints && (
           <div
             className={`p-3.5 rounded-xl border space-y-1 text-xs font-mono ${
               isLight
@@ -278,18 +261,10 @@ export default function QuestionRenderer({ question, theme = 'dark' }) {
                 : 'bg-[#0e1424]/80 border-slate-800/80 text-slate-300'
             }`}
           >
-            {question.constraints && (
-              <div className="flex items-center gap-1.5">
-                <Info className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
-                <span><strong className="text-red-500 dark:text-red-400">Constraints:</strong> {question.constraints}</span>
-              </div>
-            )}
-            {question.example && (
-              <div className="flex items-center gap-1.5">
-                <Lightbulb className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                <span><strong className="text-amber-500 dark:text-amber-400">Example Note:</strong> {question.example}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-1.5">
+              <Info className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+              <span><strong className="text-red-500 dark:text-red-400">Constraints:</strong> {question.constraints}</span>
+            </div>
           </div>
         )}
       </div>

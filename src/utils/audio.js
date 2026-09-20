@@ -3,7 +3,12 @@
 class SoundEngine {
   constructor() {
     this.ctx = null;
-    this.muted = false;
+    let saved = null;
+    try {
+      saved = localStorage.getItem('spidey_sound_muted');
+    } catch (e) {}
+    // Default sound to OFF (muted = true) unless explicitly unmuted
+    this.muted = saved !== null ? saved === 'true' : true;
     this.initialized = false;
   }
 
@@ -31,6 +36,9 @@ class SoundEngine {
 
   toggleMute() {
     this.muted = !this.muted;
+    try {
+      localStorage.setItem('spidey_sound_muted', String(this.muted));
+    } catch (e) {}
     return this.muted;
   }
 

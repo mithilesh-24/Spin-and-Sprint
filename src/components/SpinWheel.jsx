@@ -39,15 +39,15 @@ export default function SpinWheel({
   };
 
   return (
-    <div className="relative flex items-center justify-center select-none w-auto h-full max-h-[min(38vh,280px)] aspect-square mx-auto my-auto pt-2">
+    <div className="relative flex items-center justify-center select-none w-full h-full max-h-[min(48vh,365px)] max-w-[min(100%,365px)] aspect-square mx-auto my-auto p-1">
       {/* Outer Web Glow Ring */}
-      <div className="absolute inset-1 rounded-full bg-gradient-to-tr from-red-600/30 via-cyan-500/20 to-red-600/30 blur-lg animate-pulse pointer-events-none" />
+      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-red-600/35 via-cyan-500/20 to-red-600/35 blur-xl animate-pulse pointer-events-none" />
 
       {/* Outer Comic Bezel Frame */}
-      <div className="relative w-full h-full p-1.5 sm:p-2 rounded-full bg-gradient-to-b from-red-700 via-zinc-900 to-black border-[3px] border-red-500/80 shadow-spider-glow flex items-center justify-center">
+      <div className="relative w-full h-full p-2 rounded-full bg-gradient-to-b from-red-700 via-zinc-900 to-black border-[3.5px] border-red-500/90 shadow-[0_0_25px_rgba(226,54,54,0.5)] flex items-center justify-center">
         {/* Fixed Top Pointer (Spider Fang / Arrow) */}
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none">
-          <div className="w-5 h-7 filter drop-shadow-[0_3px_6px_rgba(226,54,54,0.9)] animate-bounce">
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none">
+          <div className="w-6 h-8 filter drop-shadow-[0_4px_8px_rgba(226,54,54,0.9)] animate-bounce">
             <svg viewBox="0 0 40 50" className="w-full h-full fill-yellow-400 stroke-black" strokeWidth="2">
               <polygon points="20,50 5,5 35,5" fill="#facc15" />
               <polygon points="20,40 10,12 30,12" fill="#e23636" />

@@ -7,16 +7,16 @@ import SoundControl from '../components/SoundControl';
 
 export default function Registration({ theme, onToggleTheme, onRegisterSuccess }) {
   return (
-    <div className="relative h-screen max-h-screen overflow-hidden flex flex-col justify-between select-none">
+    <div className="relative min-h-screen flex flex-col justify-between select-none overflow-y-auto">
       <SpiderBackground />
 
       {/* Header with Renaissance & Department Badges + Theme Toggle */}
       <HeaderBranding theme={theme} onToggleTheme={onToggleTheme} />
 
-      {/* Main Container: Fits Viewport Without Any Scroll */}
-      <main className="relative z-10 flex-1 max-w-6xl mx-auto w-full px-4 py-1 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-10 min-h-0 overflow-hidden">
+      {/* Main Container */}
+      <main className="relative z-10 flex-1 max-w-6xl mx-auto w-full px-4 py-3 sm:py-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12 min-h-0">
         {/* Left: Isolated Animated Spidey Mascot */}
-        <div className="hidden sm:flex flex-1 flex-col items-center justify-center max-w-md py-1 min-h-0">
+        <div className="hidden sm:flex flex-1 flex-col items-center justify-center max-w-md py-2 min-h-0">
           <SpideyMascot theme={theme} />
         </div>
 
@@ -27,7 +27,7 @@ export default function Registration({ theme, onToggleTheme, onRegisterSuccess }
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 py-1 text-center text-[11px] text-gray-500 border-t border-red-500/10 flex-shrink-0">
+      <footer className="relative z-10 py-2 text-center text-[11px] text-gray-500 border-t border-red-500/10 flex-shrink-0">
         Renaissance 2026 &bull; Department of Computer Science & Engineering &bull; CCC &amp; CSEA
       </footer>
 
