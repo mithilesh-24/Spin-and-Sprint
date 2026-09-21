@@ -181,4 +181,5 @@ VITE_GOOGLE_SCRIPT_URL_2ND=your_2nd_year_google_script_url_here
 - **Organizers:** CSE Coding Club (CCC) & CSEA
 
 #   s p i n - a n d - s p r i n t  
+ #   s p i n - a n d - s p r i n t 2  
  
